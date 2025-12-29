@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pokemon Spelling Test</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; text-align: center; background-color: #e0f7fa; padding: 20px; }
+        .parent-section { background: #fff; padding: 15px; border-radius: 10px; margin-bottom: 20px; border: 2px dashed #ccc; }
+        .game-card { background: white; border-radius: 20px; padding: 30px; box-shadow: 0 10px 30px rgba(0,0,0,0.15); max-width: 500px; margin: auto; }
+        .letter-btn { padding: 15px 25px; font-size: 24px; cursor: pointer; background: #ffcb05; border: 3px solid #3d7dca; border-radius: 12px; font-weight: bold; color: #3d7dca; margin: 5px; transition: transform 0.1s; }
+        .letter-btn:active { transform: scale(0.9); }
+        .display { font-size: 40px; letter-spacing: 8px; margin: 20px 0; min-height: 50px; color: #3d7dca; border-bottom: 3px solid #eee; text-transform: uppercase; }
+        #reward-area { height: 180px; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        .applause-img { width: 120px; display: none; animation: bounce 0.5s infinite; }
+        @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-20px); } }
+        .success-msg { color: #4caf50; font-size: 24px; font-weight: bold; margin-top: 10px; display: none; }
+        input[type="text"] { padding: 10px; width: 80%; border-radius: 5px; border: 1px solid #ccc; }
+        button#start-btn { padding: 10px 20px; background: #3d7dca; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+    <div class="parent-section">
+        <strong>Parent Mode:</strong> Type words separated by commas below:<br><br>
+        <input type="text" id="word-input" placeholder="e.g. apple, tree, pokemon">
+        <button id="start-btn" onclick="setupTest()">Set Test Words</button>
+    </div>
+
+    <div class="game-card">
+        <div id="reward-area">
+            <img id="pikachu" class="applause-img" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/25.png" alt="Pikachu">
+            <div id="success-msg" class="success-msg">POKÉMON MASTER! 🌟</div>
+            <div id="instruction">Spell the word!</div>
+        </div>
+
+        <div class="display" id="answer-box">READY?</div>
+        <div id="letter-bank"></div>
+    </div>
+
+    <script>
+        let myWords = ["mew", "eevee"]; // Default words
+        let currentWord = "";
+        let currentIndex = 0;
+        let userInput = "";
+
+        function setupTest() {
+            const input = document.getElementById('word-input').value;
+            if(input) {
+                myWords = input.split(',').map(w => w.trim().toUpperCase());
+                currentIndex = 0;
+                startWord();
+            }
+        }
+
+        function startWord() {
+            if (currentIndex >= myWords.length) {
+                document.getElementById('answer-box').innerText = "ALL DONE!";
+                return;
+            }
+            
+            userInput = "";
+            currentWord = myWords[currentIndex].toUpperCase();
+            document.getElementById('answer-box').innerText = "_ ".repeat(currentWord.length);
+            document.getElementById('pikachu').style.display = "none";
+            document.getElementById('success-msg').style.display = "none";
+            document.getElementById('instruction').style.display = "block";
+            
+            renderButtons();
+        }
+
+        function renderButtons() {
+            const bank = document.getElementById('letter-bank');
+            bank.innerHTML = "";
+            
+            // Scramble the word letters
+            let scrambled = currentWord.split('').sort(() => Math.random() - 0.5);
+            
+            scrambled.forEach(char => {
+                let btn = document.createElement('button');
+                btn.className = 'letter-btn';
+                btn.innerText = char;
+                btn.onclick = () => {
+                    userInput += char;
+                    document.getElementById('answer-box').innerText = userInput;
+                    btn.style.visibility = "hidden";
+                    checkWin();
+                };
+                bank.appendChild(btn);
+            });
+        }
+
+        function checkWin() {
+            if (userInput.length === currentWord.length) {
+                if (userInput === currentWord) {
+                    showApplause();
+                } else {
+                    setTimeout(() => {
+                        alert("Almost! Let's try that word again.");
+                        startWord();
+                    }, 500);
+                }
+            }
+        }
+
+        function showApplause() {
+            document.getElementById('pikachu').style.display = "block";
+            document.getElementById('success-msg').style.display = "block";
+            document.getElementById('instruction').style.display = "none";
+            
+            // Play a cheer sound if you have one, or just wait to move to next
+            setTimeout(() => {
+                currentIndex++;
+                startWord();
+            }, 2500);
+        }
+
+        // Start the very first time
+        startWord();
+    </script>
+</body>
+</html>
